@@ -3,4 +3,5 @@ node_modules/
 *.swp
 *.swo
 dist/
+test/config.ts
 package-lock.json
