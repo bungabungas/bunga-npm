@@ -2,6 +2,7 @@ import Web3 from "web3";
 import CryptoJS from 'crypto-js'
 import { Web3Storage, getFilesFromPath }  from 'web3.storage'
 import {File} from '@web-std/file';
+import { NFTStorage,Blob } from 'nft.storage'
 
 //To generate a totally new account
 const randomAccount = async () => {
@@ -107,5 +108,44 @@ export class BungaStorage {
   //Upload by File ( Input as File itself )
   public static async web3StorageCreateFromFile(b:BungaStorage,data:File): Promise<any> {
     return await BungaStorage.web3StorageCreate(b,[data])
+  }
+
+  //Upload to NFT ( Input as File itself )
+  public static async web3StorageCreateToNft(b:BungaStorage,data:File,detail:any): Promise<any> {
+    let cid = await BungaStorage.web3StorageCreate(b,[data]);
+    return await BungaStorage.web3StorageCreate(b,[new File([JSON.stringify(
+      {
+        "name":detail.name,
+        "description": detail.description,
+        "image": "https://ipfs.io/ipfs/"+cid+"/index"
+      }
+    )], 'index')])
+  }
+  /**
+   * [Upload the file to nftstorage ]
+   */
+  public static nftStorageCreate(b:BungaStorage): NFTStorage {
+    const token =b.web3Storage;
+    const client = new NFTStorage({ token })
+    return client;
+  }
+  //Upload by Text ( Input as base64 text )
+  public static async nftStorageCreateFromText(b:BungaStorage,data:string): Promise<any> {
+    let c = BungaStorage.nftStorageCreate(b)
+    return await c.storeBlob(new Blob([data]))
+  }
+  //Upload by File ( Input as File itself )
+  public static async nftStorageCreateFromFile(b:BungaStorage,data:File): Promise<any> {
+    let c = BungaStorage.nftStorageCreate(b)
+    return await c.storeBlob(new Blob([data]))
+  }
+  //Upload to mint NFT ( Input as File itself )
+  public static async nftStorageCreateToNft(b:BungaStorage,data:File,detail:any): Promise<any> {
+    let c = BungaStorage.nftStorageCreate(b)
+    return await c.store({
+      name:detail.name,
+      description: detail.description,
+      image: data
+    })
   }
 }
